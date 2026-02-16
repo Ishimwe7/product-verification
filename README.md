@@ -29,25 +29,22 @@ This project strictly adheres to layered architecture principles to ensure busin
 ### 2. Quick Start (Docker)
 The easiest way to run the entire stack (App + MySQL + MongoDB) is using the provided automation script:
 
-```bash
 # Setup environment, start databases, and run the server
 bash run.sh
 
 ### 3. Environment Configuration
 
-```bash
-#Copy the template to create your environment file:
+*Copy the template to create your environment file:*
 cp .env.example .env
 
 ### Testing & Quality Assurance
-I utilized pytest for both unit and integration testing. To ensure the src directory is correctly mapped and the Python path is set, use the provided test script:
+*I utilized pytest for both unit and integration testing. To ensure the src directory is correctly mapped and the Python path is set, use the provided test script:*
 
-```bash
 # Run Unit and Integration tests
 bash test.sh
 
 
-### 🧪 Test Coverage Includes:
+### Test Coverage Includes:
 
 * **Domain Logic:** Validation of price, stock, and asset requirements (including negative testing).
 * **Integration:** Full lifecycle from product creation to hybrid database persistence and retrieval.
