@@ -1,0 +1,4 @@
+.env
+.pytest_cache
+# Ignore all Python bytecode files in src directory
+src/**/*.pyc
