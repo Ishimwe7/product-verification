@@ -50,13 +50,16 @@ A robust product management service implementing **Clean Architecture** and **Do
 ### 2. Quick Start (Docker)
 The easiest way to run the entire stack (App + MySQL + MongoDB) is using the provided automation script:
 
-# Setup environment, start databases, and run the server
+```bash
 bash run.sh
+```
 
 ### 3. Environment Configuration
 
-*Copy the template to create your environment file:*  
+*Copy the template to create your environment file:* 
+```bash 
 cp .env.example .env
+```
 
 ### 4. Database Seeding
 To populate the database with initial test data (categories, sample products, etc.), run the seeding script:
@@ -67,8 +70,9 @@ To populate the database with initial test data (categories, sample products, et
 *I utilized pytest for both unit and integration testing. To ensure the src directory is correctly mapped and the Python path is set, use the provided test script:*
 
 # Run Unit and Integration tests
+```bash
 bash test.sh
-
+```
 
 ### Test Coverage Includes:
 
