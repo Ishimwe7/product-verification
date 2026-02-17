@@ -100,3 +100,10 @@ class MongoVerificationRepository:
         # to_list(length=None) fetches all matching documents
         cursor = self.collection.find({"product_id": product_id}, {"_id": 0})
         return await cursor.to_list(length=100)
+    
+    async def get_all_logs(self, limit: int = 50, offset: int = 0):
+        cursor = self.collection.find({}, {"_id": 0}) \
+                                .sort("timestamp", -1) \
+                                .skip(offset) \
+                                .limit(limit)
+        return await cursor.to_list(length=limit)

@@ -88,9 +88,18 @@ bash test.sh
 | **POST** | `/api/v1/products/{id}/verify` | Trigger domain verification and transition state | 200 |
 | **GET** | `/api/v1/products/{id}` | Retrieve specific product details and status | 200 |
 | **GET** | `/api/v1/products` | List all products in the catalog | 200 |
-
+| **GET** | `/api/v1/products/{id}/logs` | Retrieve specific verification failure reasons from **MongoDB** | 200 |
+| **GET** | `/api/v1/admin/logs` | **Admin Only:** Fetch all historical verification attempts (Paginated) | 200 |
 
 ---
+
+### Admin & Observability
+
+To maintain system integrity and auditability, the logging infrastructure follows these standards:
+
+* **Restricted Access**: The `/api/v1/admin/logs` endpoint is designated for administrative use. In production, this is protected via **Role-Based Access Control (RBAC)** to prevent unauthorized access to the full audit trail.
+* **Pagination**: To ensure high performance and low latency, the global logs endpoint is **paginated**. It supports `limit` and `offset` parameters (defaulting to the latest 50 entries) to prevent memory overhead when handling large datasets.
+* **Data Persistence**: Verification logs are stored in **MongoDB** as immutable documents. This ensures a permanent audit history that persists even if the primary product record is modified or archived in the MySQL database.
 
 ## Business Rules (Requirement #4)
 

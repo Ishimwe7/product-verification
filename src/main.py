@@ -112,3 +112,14 @@ def list_products(use_case: ListProductsUseCase = Depends(get_list_products_use_
 async def get_product_logs(product_id: str, repo: MongoVerificationRepository = Depends(get_mongo_repo)):
     logs = await repo.get_logs_by_product(product_id)
     return logs
+
+@app.get("/api/v1/admin/logs")
+async def list_all_verification_logs(
+    #setting limit to get only 50 last logs
+    limit: int = 50, 
+    offset: int = 0,
+    repo: MongoVerificationRepository = Depends(get_mongo_repo)):
+    """
+    Admin only: Retrieve all product verification failure/success logs.
+    """
+    return await repo.get_all_logs(limit,offset)
