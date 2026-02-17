@@ -26,7 +26,7 @@ This project strictly adheres to layered architecture principles to ensure busin
 A robust product management service implementing **Clean Architecture** and **Domain-Driven Design (DDD)**. This service manages product lifecycles using a hybrid database strategy to balance structured data and flexible audit trails.
 
 ---
-
+```text
 ## Project Structure
 
 ├── src/
@@ -40,7 +40,7 @@ A robust product management service implementing **Clean Architecture** and **Do
 ├── run.sh               # Startup Automation
 └── test.sh              # Test Automation
 ---
-
+```
 ## Getting Started
 
 ### 1. Prerequisites
