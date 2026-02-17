@@ -59,11 +59,17 @@ class Product:
             "has_assets": len(self.assets) >= 1
         }
         
+        # Generate the 'reasons' list for MongoDB
+        reasons = []
+        if not checks["name_present"]: reasons.append("Name is missing")
+        if not checks["category_present"]: reasons.append("Category is missing")
+        if not checks["currency_present"]: reasons.append("Currency is missing")
+        if not checks["price_valid"]: reasons.append(f"Invalid price: {self.price}")
+        if not checks["stock_valid"]: reasons.append(f"Invalid stock: {self.stock_quantity}")
+        if not checks["has_assets"]: reasons.append("At least 1 asset required")
+
         passed = all(checks.values())
+        self.status = "active" if passed else "rejected"
         
-        if passed:
-            self.status = "active"
-        else:
-            self.status = "rejected"
-            
-        return passed, checks
+        # Return all three pieces needed for the repositories
+        return passed, checks, reasons

@@ -11,7 +11,7 @@ from src.use_cases.verify_product import VerifyProductUseCase
 from src.use_cases.get_product import GetProductUseCase
 from src.api.schemas import ProductCreateSchema
 from src.use_cases.list_products import ListProductsUseCase 
-
+from src.application.services import ProductApplicationService
 # 1. Database Setup
 
 # Load the .env file
@@ -37,6 +37,9 @@ Base.metadata.create_all(bind=engine) # Creates tables in Docker MySQL
 
 app = FastAPI(title="Product Verification Service")
 
+# Initialize the service once
+app_service = ProductApplicationService()
+
 # 2. Dependency Injection Providers
 def get_db():
     db = SessionLocal()
@@ -55,10 +58,11 @@ def get_mysql_repo(db=Depends(get_db)):
     return MySQLProductRepository(db)
 
 def get_create_use_case(db=Depends(get_db), dispatcher=Depends(get_dispatcher)):
-    return CreateProductUseCase(MySQLProductRepository(db), dispatcher)
+    return CreateProductUseCase(mysql_repo=MySQLProductRepository(db), service=app_service, dispatcher=dispatcher)
 
 def get_verify_use_case(db=Depends(get_db), mongo=Depends(get_mongo_repo), dispatcher=Depends(get_dispatcher)):
-    return VerifyProductUseCase(MySQLProductRepository(db), mongo, dispatcher)
+    # Passing the service into the Use Case
+    return VerifyProductUseCase(MySQLProductRepository(db), mongo, app_service, dispatcher)
 
 def get_get_product_use_case(repo=Depends(get_mysql_repo)):
     return GetProductUseCase(repo)
@@ -103,3 +107,8 @@ def list_products(use_case: ListProductsUseCase = Depends(get_list_products_use_
         )
         
     return products
+
+@app.get("/api/v1/products/{product_id}/logs")
+async def get_product_logs(product_id: str, repo: MongoVerificationRepository = Depends(get_mongo_repo)):
+    logs = await repo.get_logs_by_product(product_id)
+    return logs

@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import Column, String, Float, Integer, DateTime, JSON
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from motor.motor_asyncio import AsyncIOMotorClient
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Optional, Dict, Any
 from src.domain.models import Product
 
@@ -20,8 +20,8 @@ class ProductModel(Base):
     stock_quantity = Column(Integer, default=0)
     assets = Column(JSON, nullable=True)
     status = Column(String(50), default="pending_verification") #
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default= datetime.now(UTC))
+    updated_at = Column(DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC))
 
 class MySQLProductRepository:
     def __init__(self, session: Session):
@@ -29,22 +29,21 @@ class MySQLProductRepository:
 
     def get_by_id(self, product_id: str):
         # Fetch the row from the database
-        product_row = self.session.query(ProductModel).filter(ProductModel.id == product_id).first()
+        row = self.session.query(ProductModel).filter(ProductModel.id == product_id).first()
         
-        if not product_row:
+        if not row:
             return None
 
-        # Manually map it to a dictionary so the Use Case can find "category"
-        return {
-            "id": product_row.id,
-            "name": product_row.name,
-            "category": product_row.category,
-            "price": product_row.price,
-            "currency": product_row.currency,
-            "stock_quantity": product_row.stock_quantity,
-            "assets": product_row.assets,  
-            "status": product_row.status
-        }
+        return Product(
+            id=row.id,
+            name=row.name,
+            category=row.category,
+            price=row.price,
+            currency=row.currency,
+            stock_quantity=row.stock_quantity,
+            assets=row.assets,
+            status=row.status
+        )
 
     def update_status(self, product_id: str, status: str):
         product = self.session.query(ProductModel).filter(ProductModel.id == product_id).first()
@@ -67,20 +66,18 @@ class MySQLProductRepository:
         self.session.refresh(db_product)
         
     def get_all(self):
-        product_rows = self.session.query(ProductModel).all()
+        rows = self.session.query(ProductModel).all()
         return [
-            {
-                "id": row.id,
-                "name": row.name,
-                "category": row.category,
-                "price": row.price,
-                "currency": row.currency,
-                "stock_quantity": row.stock_quantity,
-                "assets": row.assets,
-                "status": row.status,
-                "created_at": row.created_at
-            }
-            for row in product_rows
+            Product(
+                id=row.id,
+                name=row.name,
+                category=row.category,
+                price=row.price,
+                currency=row.currency,
+                stock_quantity=row.stock_quantity,
+                assets=row.assets,
+                status=row.status
+            ) for row in rows
         ]
 # MongoDB Model (Audit Log) 
 class MongoVerificationRepository:
@@ -89,11 +86,17 @@ class MongoVerificationRepository:
         self.db = self.client.verification_db
         self.collection = self.db.verification_logs
 
-    async def log_verification(self, product_id: str, passed: bool, checks: dict):
+    async def log_verification(self, product_id: str, passed: bool, checks: dict,reasons: list):
         document = {
             "product_id": product_id,
             "passed": passed,
             "checks": checks,
-            "verified_at": datetime.utcnow()
+            "reasons": reasons,
+            "verified_at": datetime.now(UTC)
         }
         await self.collection.insert_one(document)
+
+    async def get_logs_by_product(self, product_id):
+        # to_list(length=None) fetches all matching documents
+        cursor = self.collection.find({"product_id": product_id}, {"_id": 0})
+        return await cursor.to_list(length=100)

@@ -2,37 +2,20 @@ import uuid
 from src.domain.models import Product
 
 class CreateProductUseCase:
-    def __init__(self, mysql_repo, dispatcher):
-        """
-        Injected dependencies.
-        """
+    def __init__(self, mysql_repo, service, dispatcher):
         self.mysql_repo = mysql_repo
+        self.service = service
         self.dispatcher = dispatcher
 
-    def execute(self, data: dict) -> Product:
-        # 1. Create the Domain Entity
-        # Requirement #6: Status must start as 'pending_verification'
-        product = Product(
-            id=str(uuid.uuid4()),
-            name=data['name'],
-            category=data['category'],
-            price=data['price'],
-            currency=data['currency'],
-            stock_quantity=data['stock_quantity'],
-            assets=data['assets'],
-            status="pending_verification" 
-        )
-
-        # 2. Persist to MySQL
+    def execute(self, data: dict):
+        # Use Service to create the Domain Entity
+        # This ensures it starts as 'pending_verification'
+        product = self.service.prepare_for_creation(data)
+        
         self.mysql_repo.save(product)
-
-        # 3. Dispatch Domain Event
-        # This helps with the event-driven requirement
-        #self.dispatcher.dispatch({"event": "ProductCreated", "id": product.id})
+        
+        # Dispatch the required event
         from src.domain.models import ProductCreatedPendingVerification
-
-        self.dispatcher.dispatch(
-            ProductCreatedPendingVerification(product_id=product.id)
-        )
-
+        self.dispatcher.dispatch(ProductCreatedPendingVerification(product_id=product.id))
+        
         return product

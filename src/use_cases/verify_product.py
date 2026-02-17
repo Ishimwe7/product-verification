@@ -2,44 +2,33 @@ from src.domain.models import Product
 import datetime
 
 class VerifyProductUseCase:
-    def __init__(self, mysql_repo, mongo_repo, dispatcher):
+    def __init__(self, mysql_repo, mongo_repo, service, dispatcher):
         self.mysql_repo = mysql_repo
         self.mongo_repo = mongo_repo
+        self.service = service  # Injected Application Service
         self.dispatcher = dispatcher
 
     async def execute(self, product_id: str):
-        # 1. Get raw data from MySQL
-        data = self.mysql_repo.get_by_id(product_id)
-        if not data:
+        # 1. Fetch Entity (Ensure repo returns a Product instance, not a dict)
+        product = self.mysql_repo.get_by_id(product_id)
+        if not product:
             return None
 
-        # Check the status before doing anything else
-        if data["status"] != "pending_verification":
-            # Log an audit trail for this attempt
-            await self.mongo_repo.log_verification(product_id, False, {"error": f"Product is already in {data['status']} state"})     
-            raise ValueError(f"Product is already {data['status']} and cannot be re-verified.")
+        if product.status != "pending_verification":
+            raise ValueError(f"Product is already {product.status}")
 
-        product = Product(
-            id=data["id"],
-            name=data["name"],
-            category=data["category"],
-            price=data["price"],
-            currency=data["currency"],
-            stock_quantity=data["stock_quantity"],
-            assets=data["assets"], # Ensure this is a list
-            status=data["status"]
-        )
+        # 2. Use the Service for logic
+        passed, checks, reasons = self.service.evaluate_verification(product)
 
-        # 3. Run the logic we wrote in models.py
-        passed, checks = product.evaluate_verification()
+        # 3. Update Status
+        product.status = "active" if passed else "rejected"
 
-        # 4. Save updated status back to MySQL
+        # 4. Persistence
         self.mysql_repo.update_status(product.id, product.status)
+        # Pass 'reasons' to Mongo to fulfill Requirement #4
+        await self.mongo_repo.log_verification(product.id, passed, checks, reasons)
 
-        # 5. Log the audit trail to MongoDB (Requirement #5)
-        await self.mongo_repo.log_verification(product.id, passed, checks)
-
-        # 6. Dispatch the completion event
+        # 5. Dispatch Event
         from src.domain.models import ProductVerificationCompleted
         self.dispatcher.dispatch(
             ProductVerificationCompleted(product_id=product.id, status=product.status)

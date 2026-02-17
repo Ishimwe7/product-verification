@@ -1,13 +1,12 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 
 class ProductCreateSchema(BaseModel):
-    name: str = Field(..., min_length=1)
-    category: str = Field(..., min_length=1)
-    price: float = Field(..., gt=0)
-    currency: str = Field(..., min_length=3, max_length=3)
-    stock_quantity: int = Field(..., ge=0)
-    assets: List[str] = Field(..., min_items=1)
+    model_config = ConfigDict(from_attributes=True) 
 
-    class Config:
-        from_attributes = True
+    name: str 
+    category: str 
+    price: float 
+    currency: str 
+    stock_quantity: int 
+    assets: List[str] 
