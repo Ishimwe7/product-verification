@@ -6,11 +6,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from src.infrastructure.repositories import MySQLProductRepository, MongoVerificationRepository, Base
 from src.infrastructure.dispatcher import DummyEventDispatcher
-from src.use_cases.create_product import CreateProductUseCase
-from src.use_cases.verify_product import VerifyProductUseCase
-from src.use_cases.get_product import GetProductUseCase
+from src.application.use_cases.create_product import CreateProductUseCase
+from src.application.use_cases.verify_product import VerifyProductUseCase
+from src.application.use_cases.get_product import GetProductUseCase
 from src.api.schemas import ProductCreateSchema
-from src.use_cases.list_products import ListProductsUseCase 
+from src.application.use_cases.list_products import ListProductsUseCase 
 from src.application.services import ProductApplicationService
 # 1. Database Setup
 

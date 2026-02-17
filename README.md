@@ -17,30 +17,22 @@ This project strictly adheres to layered architecture principles to ensure busin
 * **Domain Layer:** Contains the `Product` entity, state transition guards, and pure verification logic.
 * **Infrastructure Layer:** Implementation details for **MySQL** (Core Data), **MongoDB** (Verification Audit), and a Console Event Dispatcher.
 
-# Product Verification Service
-
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
-[![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat&logo=python)](https://www.python.org/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker)](https://www.docker.com/)
-
-A robust product management service implementing **Clean Architecture** and **Domain-Driven Design (DDD)**. This service manages product lifecycles using a hybrid database strategy to balance structured data and flexible audit trails.
-
----
-```text
 ## Project Structure
-
+```text
 ├── src/
-│   ├── api/             # FastAPI Routers & Schemas
-│   ├── domain/          # Entities & Business Logic
-│   ├── use_cases/       # Application Logic (Interactors)
-│   ├── infrastructure/  # Database Repositories & Clients
-│   └── main.py          # App Entry Point
-├── tests/               # Unit & Integration Tests
-├── docker-compose.yml   # Infrastructure Orchestration
-├── run.sh               # Startup Automation
-└── test.sh              # Test Automation
----
+│   ├── api/                # FastAPI Routers & Pydantic Schemas
+│   ├── domain/             # Core Entities & Business Logic (Requirement #4)
+│   ├── application/        # Application Layer
+│   │   └── use_cases/      # Application-specific Business Logic (Interactors)
+│   ├── infrastructure/     # Repositories (MySQL/MongoDB) & DB Clients
+│   └── main.py             # FastAPI Entry Point & Dependency Injection
+├── tests/                  # Unit & Integration Tests (Requirement #10)
+├── docker-compose.yml      # Infrastructure Orchestration
+├── seed.py                 # Initial Data Population Script
+├── run.sh                  # Startup Automation Script
+└── test.sh                 # Test Execution Script
 ```
+
 ## Getting Started
 
 ### 1. Prerequisites
